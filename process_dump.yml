@@ -52,3 +52,9 @@
     #   register: result
 
               
+    # Require windows network sharing
+    - name: Upload content
+      ansible.windows.win_powershell:
+        script: |
+          Copy-Item {{ compress_file }} -Destination \\{{ desination_host }}\{{ desination_upload_path }}
+
