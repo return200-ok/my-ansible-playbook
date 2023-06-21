@@ -1,0 +1,54 @@
+---
+
+- name: "Process dump"
+  hosts: procdump
+  become: true
+  become_user: root
+  tasks:
+    - name: Get process id
+      ansible.windows.win_powershell:
+        script: |
+          Get-Process -IncludeUserName| where Username -Clike "*{{ Username_of_process }}*"
+      register: process_obj 
+
+    - name: Set timestamp
+      ansible.windows.win_powershell:
+        script: |
+          get-date -f yyyMMdd-hhmmss
+      register: timestamp
+
+    - name: Process win_shell output
+      set_fact:
+        process_obj: "{{ process_obj }}"
+        timestamp: "{{ timestamp }}"
+
+    - name: Create file name
+      set_fact:
+        dump_file: "{{ dump_folder }}\\{{ Username_of_process }}_{{ timestamp.output }}.dmp"
+        compress_file: "{{ dump_folder }}\\{{ Username_of_process }}_{{ timestamp.output }}.zip"
+
+    - name: Debug value 
+      debug:
+        msg: "{{ process_obj.output.0.Id }}"
+
+    - name: Dump process
+      ansible.windows.win_powershell:
+        script: |
+          C:\Procdump\procdump.exe -ma {{ process_obj.output.0.Id }} -accepteula {{ dump_file }}
+
+    - name: Compress dump file
+      ansible.windows.win_powershell:
+        script: |
+           Compress-Archive -LiteralPath {{ dump_file }} -DestinationPath {{ compress_file }}
+    
+    # - name: Upload content
+    #   local_action:
+    #     module: uri
+    #     url: "http://ftp.example.oom"
+    #     method: PUT
+    #     url_username: "{{ ansible_user }}"
+    #     url_password: "{{ ansible_password }}"
+    #     body: "{{ lookup('file', fileToTransfer) }}"
+    #   register: result
+
+              
