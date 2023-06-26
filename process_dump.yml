@@ -53,10 +53,22 @@
 
               
     # Require windows network sharing
-    - name: Upload content
-      ansible.windows.win_powershell:
-        script: |
-          Copy-Item {{ compress_file }} -Destination \\{{ desination_host }}\{{ desination_upload_path }}
+    # - name: Upload content
+    #   ansible.windows.win_powershell:
+    #     script: |
+    #       Copy-Item {{ compress_file }} -Destination \\{{ desination_host }}\{{ desination_upload_path }}
+
+    # - name: Upload content
+    #   tags: upload
+    #   local_action:
+    #     module: ftp
+    #     host: "192.168.58.118"
+    #     user: "anonymous"
+    #     password: "123456"
+    #     src: "C:\\Users\\vagrant\\Downloads\\abc"
+    #     dest: "C:\\Users\\vagrant\\Downloads"
+    #     direction: push
+
 
     - name: Upload content
       ansible.windows.win_powershell:
